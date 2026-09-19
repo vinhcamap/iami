@@ -71,6 +71,30 @@ export default function Home() {
     }
   };
 
+  // Hàm cập nhật nội dung
+  const handleContentChange = async (newContent: string) => {
+    if (!activePage) return;
+    setActivePage({ ...activePage, content: newContent });
+    setPages(pages.map(p => p.id === activePage.id ? { ...p, content: newContent } : p));
+
+    await supabase
+      .from("pages")
+      .update({ content: newContent })
+      .eq("id", activePage.id);
+  };
+
+  // Hàm cập nhật và sửa tên trang mới
+  const handleTitleChange = async (newTitle: string) => {
+    if (!activePage) return;
+    setActivePage({ ...activePage, title: newTitle });
+    setPages(pages.map(p => p.id === activePage.id ? { ...p, title: newTitle } : p));
+
+    await supabase
+      .from("pages")
+      .update({ title: newTitle })
+      .eq("id", activePage.id);
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center text-gray-500">
@@ -124,11 +148,23 @@ export default function Home() {
           <div className="text-sm text-green-600 font-medium">Đã đồng bộ Cloud</div>
         </header>
 
-        <div className="max-w-3xl w-full mx-auto px-8 py-12 flex-1">
-          <h1 className="text-4xl font-bold text-gray-900 mb-6">{activePage?.title}</h1>
-          <p className="text-gray-600 mb-4 whitespace-pre-wrap">
-            {activePage?.content}
-          </p>
+        <div className="max-w-3xl w-full mx-auto px-8 py-12 flex-1 flex flex-col">
+          {/* Ô nhập tiêu đề để có thể sửa tên trang trực tiếp */}
+          <input
+            type="text"
+            value={activePage?.title || ""}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            className="text-4xl font-bold text-gray-900 mb-6 bg-transparent border-b border-transparent hover:border-gray-200 focus:border-indigo-500 focus:outline-none transition-colors"
+          />
+          
+          {/* Ô nhập nội dung */}
+          <textarea
+            value={activePage?.content || ""}
+            onChange={(e) => handleContentChange(e.target.value)}
+            placeholder="Nhập nội dung ghi chú tại đây..."
+            className="w-full flex-1 min-h-[300px] text-gray-700 bg-transparent resize-none focus:outline-none whitespace-pre-wrap leading-relaxed text-base"
+          />
+
           <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center text-gray-400 mt-8">
             Khu vực soạn thảo nội dung (Block Editor)
           </div>
